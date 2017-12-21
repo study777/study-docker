@@ -240,3 +240,102 @@ type Context struct {
 
 
 ```
+#### App.Run 方法
+
+````
+godoc  -src  github.com/urfave/cli Run
+
+
+```
+
+```golang
+func (a *App) Run(arguments []string) (err error) {
+    a.Setup()
+
+    shellComplete, arguments := checkShellCompleteFlag(a, arguments)
+
+    set, err := flagSet(a.Name, a.Flags)
+    if err != nil {
+        return err
+    }
+
+    set.SetOutput(ioutil.Discard)
+    err = set.Parse(arguments[1:])
+    nerr := normalizeFlags(a.Flags, set)
+    context := NewContext(a, set, nil)
+    if nerr != nil {
+        fmt.Fprintln(a.Writer, nerr)
+        ShowAppHelp(context)
+        return nerr
+    }
+    context.shellComplete = shellComplete
+
+    if checkCompletions(context) {
+        return nil
+    }
+
+    if err != nil {
+        if a.OnUsageError != nil {
+            err := a.OnUsageError(context, err, false)
+            a.handleExitCoder(context, err)
+            return err
+        }
+        fmt.Fprintf(a.Writer, "%s %s\n\n", "Incorrect Usage.", err.Error())
+        ShowAppHelp(context)
+        return err
+    }
+
+    if !a.HideHelp && checkHelp(context) {
+        ShowAppHelp(context)
+        return nil
+    }
+
+    if !a.HideVersion && checkVersion(context) {
+        ShowVersion(context)
+        return nil
+    }
+
+    if a.After != nil {
+        defer func() {
+            if afterErr := a.After(context); afterErr != nil {
+                if err != nil {
+                    err = NewMultiError(err, afterErr)
+                } else {
+                    err = afterErr
+                }
+            }
+        }()
+    }
+
+    if a.Before != nil {
+        beforeErr := a.Before(context)
+        if beforeErr != nil {
+            fmt.Fprintf(a.Writer, "%v\n\n", beforeErr)
+            ShowAppHelp(context)
+            a.handleExitCoder(context, beforeErr)
+            err = beforeErr
+            return err
+        }
+    }
+
+    args := context.Args()
+    if args.Present() {
+        name := args.First()
+        c := a.Command(name)
+        if c != nil {
+            return c.Run(context)
+        }
+    }
+
+    if a.Action == nil {
+        a.Action = helpCommand.Action
+    }
+
+    err = HandleAction(a.Action, context)
+
+    a.handleExitCoder(context, err)
+    return err
+}
+```
+
+
