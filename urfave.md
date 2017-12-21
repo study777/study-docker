@@ -214,6 +214,18 @@ app.Before = func(context *cli.Context) error {
                 return nil
         }
 
+type App struct {
+    Before BeforeFunc
+}
+
+go doc  github.com/urfave/cli BeforeFunc
+
+type BeforeFunc func(*Context) error
+    BeforeFunc is an action to execute before any subcommands are run, but after
+    the context is ready if a non-nil error is returned, no subcommands are run
+    
+    
+
 
 
 
