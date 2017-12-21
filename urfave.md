@@ -338,4 +338,56 @@ func (a *App) Run(arguments []string) (err error) {
 }
 ```
 
+#### a.Setup 方法
 
+```
+godoc  -src  github.com/urfave/cli Setup
+```
+
+```
+func (a *App) Setup() {
+    if a.didSetup {
+        return
+    }
+
+    a.didSetup = true
+
+    if a.Author != "" || a.Email != "" {
+        a.Authors = append(a.Authors, Author{Name: a.Author, Email: a.Email})
+    }
+
+    newCmds := []Command{}
+    for _, c := range a.Commands {
+        if c.HelpName == "" {
+            c.HelpName = fmt.Sprintf("%s %s", a.HelpName, c.Name)
+        }
+        newCmds = append(newCmds, c)
+    }
+    a.Commands = newCmds
+
+    if a.Command(helpCommand.Name) == nil && !a.HideHelp {
+        a.Commands = append(a.Commands, helpCommand)
+        if (HelpFlag != BoolFlag{}) {
+            a.appendFlag(HelpFlag)
+        }
+    }
+
+    if !a.HideVersion {
+        a.appendFlag(VersionFlag)
+    }
+
+    a.categories = CommandCategories{}
+    for _, command := range a.Commands {
+        a.categories = a.categories.AddCommand(command.Category, command)
+    }
+    sort.Sort(a.categories)
+
+    if a.Metadata == nil {
+        a.Metadata = make(map[string]interface{})
+    }
+
+    if a.Writer == nil {
+        a.Writer = os.Stdout
+    }
+}
+```
