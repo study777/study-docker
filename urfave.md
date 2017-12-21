@@ -12,11 +12,11 @@ const usage = `mydocker is a simple container runtime implementation.
                            Enjoy it, just for fun.`
 
 func main() {
-        app := cli.NewApp()
+        app := cli.NewApp()  //返回一个 *App  下面是赋值操作
         app.Name = "mydocker"
         app.Usage = usage
 
-        app.Commands = []cli.Command{
+        app.Commands = []cli.Command{  
                 initCommand,
                 runCommand,
         }
