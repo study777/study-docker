@@ -391,3 +391,19 @@ func (a *App) Setup() {
     }
 }
 ```
+
+
+```
+godoc  -src  github.com/urfave/cli didSetup
+
+
+```golang
+
+```
+
+
+type App struct {
+    didSetup bool
+    // contains filtered or unexported fields
+}
+```
