@@ -36,8 +36,24 @@ func main() {
                                                                                                                                                      34,1          Bot
 ```
 
-```golang
+```
 godoc -src  github.com/urfave/cli  NewApp
+```
+
+```golang
+func NewApp() *App {
+    return &App{
+        Name:         filepath.Base(os.Args[0]),
+        HelpName:     filepath.Base(os.Args[0]),
+        Usage:        "A new cli application",
+        UsageText:    "",
+        Version:      "0.0.0",
+        BashComplete: DefaultAppComplete,
+        Action:       helpCommand.Action,
+        Compiled:     compileTime(),
+        Writer:       os.Stdout,
+    }
+}
 ```
 
 
